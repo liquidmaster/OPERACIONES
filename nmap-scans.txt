@@ -1,0 +1,135 @@
+NMAP
+Basic Scan Types [-sT, -sS]
+	TCP connect() Scan [-sT]
+	SYN Stealth Scan [-sS]
+FIN, Null and Xmas Tree Scans [-sF, -sN, -sX]
+Ping Scan [-sP]
+UDP Scan [-sU]
+IP Protocol Scans [-sO]
+Idle Scanning [-sI]
+Version Detection [-sV]
+ACK Scan [-sA]
+Window Scan, RPC Scan, List Scan [-sW, -sR, -sL]
+
+
+COMMANDS
+FIN, Null and Xmas Tree Scans [-sF, -sN, -sX]
+	nmap -sS 127.0.0.1
+		PORT STATE SERVICE
+		21/tcp open ftp
+		22/tcp open ssh
+		631/tcp open ipp
+		6000/tcp open X11
+	 nmap -sF 127.0.0.1
+		PORT STATE SERVICE
+		21/tcp open|filtered ftp
+		22/tcp open|filtered ssh
+		631/tcp open|filtered ipp
+		6000/tcp open|filtered X11
+
+Ping Scan [-sP], UDP Scan [-sU], IP Protocol Scans [-sO]
+
+	nmap -sO 127.0.0.1
+		PROTOCOL	STATE		SERVICE
+		1 		open 		icmp
+		2 		open|filtered 	igmp
+		6 		open		tcp
+		17		open		udp
+		255		open|filtered 	unknown
+
+Idle Scanning [-sI], Version Detection [-sV], ACK Scan [-sA], Window Scan, RPC Scan, List Scan [-sW,-sR, -sL]
+
+Typical Scanning Session
+First, we’ll sweep the network with a simple Ping scan to determine which hosts
+are online.
+	 nmap -sP 10.0.0.0/24
+		Starting Nmap 4.01 ( http://www.insecure.org/nmap/ )
+		Host 10.0.0.1 appears to be up.
+		MAC Address: 00:09:5B:29:FD:96 (Netgear)
+		Host 10.0.0.2 appears to be up.
+		MAC Address: 00:0F:B5:96:38:5D (Netgear)
+		Host 10.0.0.4 appears to be up.
+		Host 10.0.0.5 appears to be up.
+		MAC Address: 00:14:2A:B1:1E:2E (Elitegroup Computer System Co.)
+		Nmap finished: 256 IP addresses (4 hosts up) scanned in 5.399 seconds
+
+We’ll scan 10.0.0.1 using a SYN scan [-sS] and -A to enable OS fingerprinting
+and version detection.
+	nmap -sS -A 10.0.0.1
+		Starting Nmap 4.01 ( http://www.insecure.org/nmap/ )
+		Insufficient responses for TCP sequencing (0),
+		OS detection may be less accurate
+		Interesting ports on 10.0.0.1:
+		(The 1671 ports scanned but not shown below are in state: closed)
+		PORT STATE SERVICE VERSION
+		80/tcp open tcpwrapped
+		MAC Address: 00:09:5B:29:FD:96 (Netgear)
+		Device type: WAP
+		Running: Compaq embedded, Netgear embedded
+		OS details: WAP: Compaq iPAQ Connection Point or
+		Netgear MR814
+		Nmap finished: 1 IP address (1 host up) scanned in 19 3.533 seconds
+
+The only open port is 80/tcp - in this case, the web admin interface for the router. OS fingerprinting guessed it was a Netgear Wireless Access Point - in fact this is a Netgear (wired) ADSL router. As it said, though, there were insufficient responses for TCP sequencing to accurately detect the OS. Now we’ll do the same for 10.0.0.2...
+
+	map -sS -A 10.0.0.2
+		Starting Nmap 4.01 ( http://www.insecure.org/nmap/ )
+		Interesting ports on 10.0.0.2:
+		(The 1671 ports scanned but not shown below are in state: closed)
+		PORT STATE SERVICE VERSION
+		80/tcp open http Boa HTTPd 0.94.11
+		MAC Address: 00:0F:B5:96:38:5D (Netgear)
+		Device type: general purpose
+		Running: Linux 2.4.X|2.5.X
+		OS details: Linux 2.4.0 - 2.5.20
+		Uptime 14.141 days (since Fri Jun 30 11:03:05 2006)
+		Nmap finished: 1 IP address (1 host up) scanned in 9.636 seconds
+
+Now we’ll move on to 10.0.0.4 and 10.0.0.5, these are likely to be normal
+computers running on the network...
+
+	nmap -sS -P0 -A -v 10.0.0.4
+	Starting Nmap 4.01 ( http://www.insecure.org/nmap/ )
+	DNS resolution of 1 IPs took 0.10s. Mode:
+	Async [#: 2, OK: 0, NX: 1, DR: 0, SF: 0, TR: 1, CN: 0]
+	Initiating SYN Stealth Scan against 10.0.0.4 [1672 ports] at 14:31
+	Discovered open port 21/tcp on 10.0.0.4
+	Discovered open port 22/tcp on 10.0.0.4
+	Discovered open port 631/tcp on 10.0.0.4
+	Discovered open port 6000/tcp on 10.0.0.4
+	The SYN Stealth Scan took 0.16s to scan 1672 total ports.
+	Initiating service scan against 4 services on 10.0.0.4 at 14:31 The service scan took 6.01s to scan 4 services on 1 host.For OSScan assuming port 21 is open, 1 is closed, and neither are firewalled
+	Host 10.0.0.4 appears to be up ... good.
+	Interesting ports on 10.0.0.4:
+	(The 1668 ports scanned but not shown below are in state: closed)
+	PORT STATE SERVICE VERSION
+	21/tcp open ftp vsftpd 2.0.3
+	22/tcp open ssh OpenSSH 4.2 (protocol 1.99)
+	631/tcp open ipp CUPS 1.1
+	6000/tcp open X11 (access denied)
+	Device type: general purpose
+	Running: Linux 2.4.X|2.5.X|2.6.X
+	OS details: Linux 2.4.0 - 2.5.20, Linux 2.5.25 - 2.6.8 or Gentoo 1.2 Linux 2.4.19 rc1-rc7
+	TCP Sequence Prediction: Class=random positive increments Difficulty=4732564 (Good luck!)
+	IPID Sequence Generation: All zeros Service Info: OS: Unix
+	Nmap finished: 1 IP address (1 host up) scanned in 8.333 seconds Raw packets sent: 1687 (74.7KB) | Rcvd: 3382 (143KB)
+
+	The -v option is needed to get Nmap to print the IPID information out! Now, onto 10.0.0.5...
+	nmap -sS -P0 -A -v 10.0.0.5
+	Starting Nmap 4.01 ( http://www.insecure.org/nmap/ )
+	Initiating ARP Ping Scan against 10.0.0.5 [1 port] at 14:35
+	The ARP Ping Scan took 0.01s to scan 1 total hosts.
+	DNS resolution of 1 IPs took 0.02s. Mode: Async
+	[#: 2, OK: 0, NX: 1, DR: 0, SF: 0, TR: 1, CN: 0]
+	Initiating SYN Stealth Scan against 10.0.0.5 [1672 ports] at 14:35
+	The SYN Stealth Scan took 35.72s to scan 1672 total ports.
+	Warning: OS detection will be MUCH less reliable because we did not find at least 1 open and 1 closed TCP port
+	Host 10.0.0.5 appears to be up ... good. All 1672 scanned ports on 10.0.0.5 are: filtered
+	MAC Address: 00:14:2A:B1:1E:2E (Elitegroup Computer System Co.) Too many fingerprints match this host to give specific OS details
+	TCP/IP fingerprint:
+	SInfo(V=4.01%P=i686-pc-linux-gnu%D=7/14%Tm=44B79DC6%O=-1%C=-1%M=00142A) T5(Resp=N) T6(Resp=N) T7(Resp=N) PU(Resp=N) Nmap finished: 1 IP address (1 host up) scanned in 43.855 seconds
+	Raw packets sent: 3369 (150KB) | Rcvd: 1 (42B)
+
+scan and it appeared in firewall logs or alerts. What else can I do to help hide my scan?
+	nmap -sS -P0 -p 1-140 -O -D xxx.xxx.xxx.xxx
+
